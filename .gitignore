@@ -1,0 +1,12 @@
+*.xtc
+*.trr
+*.cpt
+*.edr
+*.tpr
+*.zip
+*.dcd
+\#*
+charmmgui/
+__pycache__/
+.ipynb_checkpoints/
+*.bak

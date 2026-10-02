@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lapachol e a membrana: caderno aberto do projeto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Literata:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F2F7F7; --surface:#FFFFFF; --ink:#10303E; --muted:#4A6470; --line:#C9D9DC;
+  --water:#2A7BA0; --water-soft:#DDEBF2; --head:#B9D3E0; --tail:#F3DDA8;
+  --lap:#B86F00; --ok:#1E8A74; --code-bg:#0F2A36; --code-ink:#DCEBEF;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Literata",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1E28; --surface:#112A37; --ink:#E4EFF2; --muted:#9DB5BE; --line:#25414F;
+    --water:#5BB0D6; --water-soft:#10303F; --head:#1F4C63; --tail:#5A4410;
+    --lap:#F0A92E; --ok:#4CC2A8; --code-bg:#07151C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1E28; --surface:#112A37; --ink:#E4EFF2; --muted:#9DB5BE; --line:#25414F;
+  --water:#5BB0D6; --water-soft:#10303F; --head:#1F4C63; --tail:#5A4410;
+  --lap:#F0A92E; --ok:#4CC2A8; --code-bg:#07151C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;-webkit-text-size-adjust:100%}
+a{color:var(--water)}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--lap);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+nav{border-bottom:1px solid var(--line);background:var(--surface)}
+nav .wrap{display:flex;gap:20px;overflow-x:auto;white-space:nowrap;padding-top:12px;padding-bottom:12px;font-family:var(--display);font-size:15px}
+nav a{color:var(--muted);text-decoration:none;font-weight:500}
+nav a:hover{color:var(--ink)}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0}
+h1{font-size:clamp(34px,8vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:40px}
+h2{font-size:clamp(26px,5vw,34px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
+h3{font-size:19px;font-weight:700;margin:24px 0 8px}
+section{padding:48px 0 8px}
+.lead{font-size:20px;color:var(--muted);margin:20px 0 0;max-width:34em}
+.fig{margin:32px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 6px 4px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:14px;color:var(--muted);padding:6px 12px 10px}
+p{margin:0 0 14px;max-width:38em}
+ul.q{padding-left:1.2em;max-width:38em}
+ul.q li{margin-bottom:8px}
+.note{border-left:4px solid var(--lap);background:var(--surface);padding:14px 16px;border-radius:0 8px 8px 0;max-width:38em;margin:20px 0}
+.note b{font-family:var(--display)}
+ol.steps{padding:0;margin:0;list-style:none;counter-reset:s;max-width:38em}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 20px 48px;border-left:2px solid var(--line);margin-left:15px}
+ol.steps li:last-child{border-left-color:transparent}
+ol.steps li::before{content:counter(s);position:absolute;left:-16px;top:-2px;width:30px;height:30px;border-radius:50%;background:var(--water);color:#fff;font-family:var(--display);font-weight:700;display:grid;place-items:center;font-size:15px}
+ol.steps b{font-family:var(--display)}
+.params{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.params td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.params tr:last-child td{border-bottom:0}
+.params td:first-child{color:var(--muted);width:42%}
+.tbd{color:var(--lap);font-style:italic}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:6px;font-family:var(--display)}
+.stats div span{display:block;font-size:28px;font-weight:700;line-height:1.1}
+.stats div small{color:var(--muted);font-size:14px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin:8px 0 0}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.ctrl{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.ctrl input[type=range]{flex:1;min-width:0;accent-color:var(--lap);height:32px}
+.ctrl button{font:inherit;font-family:var(--display);font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;width:44px;height:44px;cursor:pointer}
+.detail{font-family:var(--display);font-size:17px;background:var(--bg);border-radius:8px;padding:12px 14px;margin-top:6px}
+.detail b{font-size:19px}
+details{margin-top:14px}
+summary{cursor:pointer;font-family:var(--display);font-weight:500;padding:6px 0}
+.tablewrap{overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+.tablewrap table{border-collapse:collapse;width:100%;font-size:14px;font-family:var(--display)}
+.tablewrap th,.tablewrap td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tablewrap th{position:sticky;top:0;background:var(--surface)}
+.entry{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.entry time{font-family:var(--display);color:var(--muted);font-size:14px}
+.entry h3{margin:2px 0 10px}
+.entry dl{margin:0}
+.entry dt{font-family:var(--display);font-weight:700;font-size:14px;color:var(--water);margin-top:10px}
+.entry dd{margin:2px 0 0}
+.code{margin:0 0 22px}
+.code h3{margin-top:0}
+.code p{font-size:15px;color:var(--muted);margin-bottom:8px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:13.5px;line-height:1.55;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2}
+ul.check{padding-left:1.2em;max-width:38em}
+ul.check li{margin-bottom:8px}
+.refs{padding-left:1.2em;font-size:15px;max-width:38em}
+.refs li{margin-bottom:10px}
+footer{margin-top:56px;border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:15px}
+.btn{display:inline-block;margin-top:8px;padding:10px 16px;border-radius:8px;background:var(--water);color:#fff;text-decoration:none;font-family:var(--display);font-weight:700}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Seções">
+  <div class="wrap">
+    <a href="#pergunta">Pergunta</a>
+    <a href="#metodo">Método</a>
+    <a href="#janelas">Janelas</a>
+    <a href="#diario">Diário</a>
+    <a href="#codigos">Códigos</a>
+    <a href="#verificar">Verificar</a>
+    <a href="#refs">Referências</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <h1>O lapachol consegue atravessar uma membrana?</h1>
+  <p class="lead">Caderno aberto de um projeto de dinâmica molecular: calculo quanta energia custa levar o lapachol da água até o meio de uma bicamada lipídica. Está em andamento e tudo aqui pode ser conferido, repetido e criticado.</p>
+  <figure class="fig">
+    <svg id="hero-fig" viewBox="0 0 720 230" role="img" aria-label="Esquema de uma bicamada lipídica com 43 pontos marcando as posições do lapachol ao longo do eixo z"></svg>
+    <figcaption>Esquema fora de escala. Cada ponto é uma janela do umbrella sampling: uma simulação curta com o lapachol preso a uma profundidade diferente.</figcaption>
+  </figure>
+</header>
+
+<main class="wrap">
+
+<section id="pergunta">
+  <h2>A pergunta científica</h2>
+  <p>O lapachol é uma naftoquinona extraída do ipê. Ele é estudado por seus efeitos biológicos, e no projeto 1 deste portfólio (<em>lapachol-nqo1</em>) eu o ancorei na enzima humana NQO1, que fica dentro da célula. Para chegar lá, a molécula precisa passar pela membrana.</p>
+  <div class="note"><b>Pergunta central.</b> Qual é o perfil de energia livre, ΔG(z), do lapachol ao atravessar uma bicamada lipídica, e onde a molécula prefere ficar?</div>
+  <h3>O que espero resolver</h3>
+  <ul class="q">
+    <li>Saber se existe uma barreira de energia no centro da membrana e quão alta ela é.</li>
+    <li>Descobrir a profundidade em que o lapachol é mais estável: na água, na região das cabeças polares ou entre as caudas.</li>
+    <li>Comparar o resultado com o LogP calculado do lapachol, para ver se os dois apontam na mesma direção.</li>
+    <li>Deixar um caminho completo e documentado, que outra pessoa possa repetir com outra molécula.</li>
+  </ul>
+  <h3>Hipótese de partida</h3>
+  <p>Por ser uma molécula bastante lipofílica, espero um mínimo de energia livre perto da interface entre as cabeças polares e as caudas, e uma barreira moderada no centro. Esta é uma expectativa a ser testada, não um resultado.</p>
+  <h3>O que este projeto não responde</h3>
+  <ul class="q">
+    <li>O perfil de energia livre sozinho não dá a permeabilidade. Para isso seria preciso também o coeficiente de difusão ao longo de z, no modelo solubilidade-difusão.</li>
+    <li>O lapachol é um ácido fraco. A primeira etapa usa uma única forma de protonação, e a outra forma fica como extensão.</li>
+    <li>Uma só composição de lipídeos e um campo de força clássico não representam uma membrana celular real.</li>
+  </ul>
+</section>
+
+<section id="metodo">
+  <h2>Como estou fazendo</h2>
+  <ol class="steps">
+    <li><b>Partição.</b> Calcular o LogP do lapachol para ter uma primeira medida de afinidade por lipídeos.</li>
+    <li><b>Montar a bicamada.</b> Construir o sistema no CHARMM-GUI: 120 POPC e cerca de 32 mil átomos.</li>
+    <li><b>Equilibrar por muito tempo.</b> Rodar a bicamada sozinha, em muitos casos por mais de 100 ns, antes de puxar o lapachol. O umbrella sampling só vale se a membrana já estiver estável.</li>
+    <li><b>Puxar o lapachol.</b> Uma simulação dirigida leva a molécula da água, passando pela membrana, até o outro lado.</li>
+    <li><b>Escolher as janelas.</b> Extrair da trajetória um quadro para cada posição, com espaçamento de 0,15 nm (43 janelas).</li>
+    <li><b>Simular cada janela, em duas etapas.</b> Etapa 1 (triagem): 2 a 5 ns por janela, só para checar a sobreposição dos histogramas e ajustar a mola e o espaçamento. Etapa 2 (convergência): estender para dezenas de ns por janela, começando pelas da interface, até o perfil parar de mudar.</li>
+    <li><b>Juntar tudo com o WHAM.</b> Combinar os histogramas das janelas no perfil ΔG(z), com barras de erro por bootstrap.</li>
+  </ol>
+  <h3>Parâmetros</h3>
+  <table class="params">
+    <tr><td>Programa</td><td>GROMACS</td></tr>
+    <tr><td>Construção do sistema</td><td>CHARMM-GUI</td></tr>
+    <tr><td>Campo de força</td><td>CHARMM36 (parâmetros do .mdp: force-switch 1,0–1,2 nm, PME)</td></tr>
+    <tr><td>Composição da bicamada</td><td>120 POPC (60 por monocamada), 13 K⁺ e 13 Cl⁻; 32.267 átomos; caixa de cerca de 6,31 × 6,31 × 7,75 nm</td></tr>
+    <tr><td>Modelo de água</td><td>TIP3P (versão CHARMM)</td></tr>
+    <tr><td>Temperatura e pressão</td><td>303,15 K (v-rescale) e 1 bar semi-isotrópico (C-rescale)</td></tr>
+    <tr><td>Constante da mola</td><td>1000 kJ/mol/nm² (a ajustar se faltar sobreposição)</td></tr>
+    <tr><td>Hardware</td><td>GPU L4 no Google Colab, em várias sessões</td></tr>
+  </table>
+  <h3>Orçamento de simulação</h3>
+  <p>Velocidade medida na GPU L4 do Colab para a bicamada pura (32.267 átomos): 270 ns por dia, em um teste de 100 ps. Os tempos abaixo usam essa velocidade como melhor caso e cerca de 180 ns por dia como caso pessimista, para o sistema com o lapachol e mais água (estimativa, ainda não medida). Rodar várias janelas juntas na mesma GPU pode reduzir o tempo.</p>
+  <table class="params">
+    <tr><td>Equilíbrio da bicamada (100 ns)</td><td>cerca de 9 a 13 horas</td></tr>
+    <tr><td>Etapa 1: 43 janelas × 5 ns (215 ns)</td><td>cerca de 0,8 a 1,2 dia</td></tr>
+    <tr><td>Etapa 2: 43 janelas × 10 ns (430 ns)</td><td>cerca de 1,6 a 2,4 dias</td></tr>
+    <tr><td>Etapa 2: 43 janelas × 20 ns (860 ns)</td><td>cerca de 3,2 a 4,8 dias</td></tr>
+    <tr><td>Etapa 2 com metade do perfil: cerca de 30 janelas × 20 ns (600 ns)</td><td>cerca de 2,2 a 3,3 dias</td></tr>
+  </table>
+</section>
+
+<section id="janelas">
+  <h2>Painel das janelas</h2>
+  <div class="panel">
+    <div class="stats" id="stats"></div>
+    <svg id="win-fig" viewBox="0 0 720 230" role="img" aria-label="Posições das 43 janelas ao longo do eixo z"></svg>
+    <div class="legend">
+      <span><i style="background:var(--surface);border:2px solid var(--ink)"></i>pendente</span>
+      <span><i style="background:var(--lap)"></i>rodando</span>
+      <span><i style="background:var(--ok)"></i>concluída</span>
+      <span><i style="background:var(--ok);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--ok)"></i>estendida</span>
+    </div>
+    <div class="ctrl">
+      <button id="prev" aria-label="Janela anterior">‹</button>
+      <input id="slider" type="range" min="0" max="42" value="21" aria-label="Escolher janela">
+      <button id="next" aria-label="Próxima janela">›</button>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+    <details>
+      <summary>Ver todas as janelas em tabela</summary>
+      <div class="tablewrap"><table id="tbl"></table></div>
+    </details>
+  </div>
+</section>
+
+<section id="diario">
+  <h2>Diário</h2>
+  <div id="diary"></div>
+</section>
+
+<section id="codigos">
+  <h2>Códigos</h2>
+  <div id="codes"></div>
+</section>
+
+<section id="verificar">
+  <h2>Como verificar este trabalho</h2>
+  <p>O repositório com os arquivos de entrada, os scripts e os resultados está no GitHub. Se você quiser conferir ou repetir o cálculo, estes são os pontos que eu mesmo uso para desconfiar do resultado:</p>
+  <ul class="check">
+    <li><b>Equilíbrio da membrana:</b> a bicamada precisa ter sido simulada por bastante tempo antes do umbrella sampling, com área por lipídeo e espessura estáveis.</li>
+    <li><b>Tempo por janela:</b> janelas curtas só servem como triagem. Para moléculas com cadeia flexível, como o lapachol, o resultado final pede dezenas de ns por janela.</li>
+    <li><b>Sobreposição:</b> os histogramas de janelas vizinhas precisam se cruzar. Se houver buraco, o perfil naquele trecho não vale.</li>
+    <li><b>Convergência:</b> o perfil calculado com 0 a 1 ns, 1 a 2 ns e assim por diante deve parar de mudar.</li>
+    <li><b>Erro:</b> a barra de erro por bootstrap precisa ser pequena perto da barreira que eu estiver discutindo.</li>
+    <li><b>Simetria:</b> numa bicamada simétrica, os dois lados do perfil devem ser parecidos. Se não forem, falta amostragem.</li>
+    <li><b>Estabilidade da membrana:</b> a espessura da bicamada não pode ter sido deformada pela etapa de puxar.</li>
+  </ul>
+  <a class="btn" href="https://github.com/msouza-compchem/lapachol-membrane">Abrir o repositório no GitHub</a>
+</section>
+
+<section id="refs">
+  <h2>Referências</h2>
+  <ol class="refs">
+    <li>Torrie GM, Valleau JP. Nonphysical sampling distributions in Monte Carlo free-energy estimation: umbrella sampling. <em>J Comput Phys</em> 1977; 23:187.</li>
+    <li>Kumar S, Bouzida D, Swendsen RH, Kollman PA, Rosenberg JM. The weighted histogram analysis method for free-energy calculations on biomolecules. I. The method. <em>J Comput Chem</em> 1992; 13:1011.</li>
+    <li>Hub JS, de Groot BL, van der Spoel D. g_wham: a free weighted histogram analysis implementation including robust error and autocorrelation estimates. <em>J Chem Theory Comput</em> 2010; 6:3713.</li>
+    <li>Marrink SJ, Berendsen HJC. Simulation of water transport through a lipid membrane. <em>J Phys Chem</em> 1994; 98:4155.</li>
+    <li>Cordeiro RM. Reactive oxygen and nitrogen species at phospholipid bilayers: peroxynitrous acid and its homolysis products. <em>J Phys Chem B</em> 2018; 122:8211. Exemplo de umbrella sampling de uma molécula pequena em bicamada, com a convergência documentada no material suplementar.</li>
+    <li>Jo S, Kim T, Iyer VG, Im W. CHARMM-GUI: a web-based graphical user interface for CHARMM. <em>J Comput Chem</em> 2008; 29:1859.</li>
+  </ol>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Projeto 3 do portfólio de química computacional de Marcelo Souza (<a href="https://github.com/msouza-compchem">msouza-compchem</a>). Os resultados só aparecem aqui depois de passarem pelas verificações acima.
+  </div>
+</footer>
+
+<script>
+/* ===== Dados editáveis (atualizados a cada publicação) ===== */
+var N = 43, ZMIN = -3.15, STEP = 0.15, K = 1000, NS_META = 2;
+/* índice da janela: { s: 'run' | 'done' | 'ext', ns: número de ns simulados } */
+var WINDOW_STATUS = {};
+
+var DIARY = [
+  {
+    data: "2026-10-02",
+    titulo: "Velocidade medida na L4 do Colab",
+    fiz: "Instalei o GROMACS 2024.5 com CUDA no Colab, gerei o .tpr da bicamada pura e rodei 100 ps de teste na GPU L4.",
+    observei: "270 ns por dia para 32.267 átomos, com o curto alcance, as ligações, o PME e a atualização das coordenadas todos na GPU. Isso é muito mais rápido do que a estimativa anterior (40 a 50 ns por dia), que eu tinha tirado de outro sistema. Os 100 ns de equilíbrio da membrana devem levar cerca de 9 horas.",
+    porque: "Com a velocidade real, a produção longa cabe em uma ou duas sessões do Colab, e o orçamento das janelas caiu bastante. Mantive a faixa pessimista de 180 ns por dia para o sistema com o lapachol, que ainda não foi medido.",
+    duvida: "A velocidade se mantém numa corrida longa, com escrita de trajetória no Drive? E qual é a velocidade do sistema com o lapachol e mais água?"
+  },
+  {
+    data: "2026-10-02",
+    titulo: "Teste de estabilidade da bicamada",
+    fiz: "Conferi a topologia, o índice e os parâmetros da bicamada pura (120 POPC) e rodei 100 ps de teste com os parâmetros de produção do CHARMM-GUI.",
+    observei: "Temperatura média de 303,05 K, pressão média de 8,6 bar, caixa estável (deriva de 0,015 nm em z) e densidade de 1017,7 kg/m³. Área por lipídeo de cerca de 66 Å². Sem avisos do LINCS. Na CPU do meu computador a velocidade foi de 4,8 ns/dia, o que inviabiliza 100 ns ali.",
+    porque: "A produção longa da membrana vai para uma GPU no Colab. O teste de 100 ps só mostra que o sistema roda sem problemas; o equilíbrio estrutural só se verifica ao longo dos 100 ns.",
+    duvida: "Qual será a velocidade real na L4 do Colab para este sistema de 32 mil átomos? O orçamento de simulação da página continua com estimativas antigas até eu medir."
+  },
+  {
+    data: "2026-10-01",
+    titulo: "Plano do umbrella sampling",
+    fiz: "Defini a estratégia: puxar o lapachol ao longo de z, usar cerca de 43 janelas, 2 a 5 ns por janela e juntar tudo com o WHAM e bootstrap.",
+    observei: "O custo estimado é de 90 a 200 ns de simulação no total, o que dá de 2 a 4 dias de GPU na L4 do Colab, divididos em várias sessões.",
+    porque: "Janelas independentes permitem retomar de onde parei em cada sessão do Colab.",
+    duvida: "Perfil completo (43 janelas a 0,15 nm) ou só metade, com simetrização (cerca de 30 janelas a 0,1 nm)?"
+  },
+  {
+    data: "2026-10-01",
+    titulo: "Revisão do plano: a convergência pede mais tempo",
+    fiz: "Reorganizei o plano em duas etapas. A etapa 1 é uma triagem de 2 a 5 ns por janela. A etapa 2 estende as janelas para dezenas de ns e é a que gera o resultado final. Incluí também um equilíbrio longo da bicamada antes de puxar o lapachol.",
+    observei: "Segundo a orientação de um pesquisador da área de simulação de membranas, o umbrella sampling deve partir de uma membrana bem equilibrada (em muitos casos, mais de 100 ns), e revisores têm pedido janelas de dezenas de ns, principalmente para moléculas maiores ou com transições lentas entre conformações. Refiz o orçamento: de cerca de 2 a 4 dias de GPU para algo entre 12 e 21 dias, dependendo do número de janelas e do tempo por janela.",
+    porque: "O lapachol tem uma cadeia isoprenil flexível, então pode ter transições conformacionais lentas. Prefiro uma triagem barata antes de gastar semanas de GPU.",
+    duvida: "Se uma conformação travar a amostragem em alguma janela, vale a pena usar troca de réplicas entre janelas?"
+  }
+];
+
+var CODES = [
+  {
+    titulo: "Puxar o lapachol ao longo de z",
+    desc: "Trecho do .mdp da simulação dirigida. A geometria direction dá a posição com sinal, o que permite cobrir os dois lados da membrana.",
+    cod: "pull                    = yes\npull-ncoords            = 1\npull-ngroups            = 2\npull-group1-name        = Bilayer\npull-group2-name        = LAP\npull-coord1-type        = umbrella\npull-coord1-geometry    = direction\npull-coord1-vec         = 0 0 1\npull-coord1-groups      = 1 2\npull-coord1-k           = 1000     ; kJ/mol/nm^2\npull-coord1-rate        = 0.005    ; nm/ps\npull-coord1-start       = yes\npull-nstxout            = 500\npull-nstfout            = 500"
+  },
+  {
+    titulo: "Escolher o quadro de cada janela",
+    desc: "Lê a posição do lapachol em cada quadro e devolve o tempo do quadro mais próximo de cada alvo. Esse tempo vai para o gmx trjconv -dump.",
+    cod: "import numpy as np\n\nd = np.loadtxt(\"pullx.xvg\", comments=(\"#\", \"@\"))\n# coluna 0: tempo (ps); coluna 1: posição com sinal (nm)\nalvos = np.arange(-3.15, 3.151, 0.15)   # 43 janelas\n\nfor i, z in enumerate(alvos):\n    k = np.argmin(np.abs(d[:, 1] - z))\n    print(i, round(z, 2), d[k, 0])"
+  },
+  {
+    titulo: "Rodar as janelas e retomar depois",
+    desc: "Pula as janelas terminadas. Se a sessão do Colab cair, rodar de novo continua de onde parou, graças ao checkpoint.",
+    cod: "for i in $(seq 0 42); do\n  w=win_$(printf \"%02d\" $i)\n  [ -f $w/prod.gro ] && continue\n  gmx mdrun -deffnm $w/prod -cpi $w/prod.cpt \\\n    -nb gpu -pme gpu -bonded gpu -update gpu\ndone"
+  },
+  {
+    titulo: "Montar o perfil com o WHAM",
+    desc: "Combina as janelas, calcula o erro por bootstrap e simetriza o perfil em torno de z = 0. Ajuste a temperatura para a da simulação.",
+    cod: "gmx wham -it tpr-files.dat -if pullf-files.dat \\\n  -o profile.xvg -hist histo.xvg -unit kJ \\\n  -temp 303.15 -zprof0 0 -sym \\\n  -nBootstrap 100 -bs-method b-hist \\\n  -bsres bsResult.xvg -bsprof bsProfs.xvg"
+  }
+];
+
+/* ===== Funções ===== */
+function fmt(n, d){ return n.toFixed(d === undefined ? 2 : d).replace(".", ",").replace("-", "\u2212"); }
+var wins = [];
+for (var i = 0; i < N; i++) wins.push({ i: i, z: Math.round((ZMIN + i * STEP) * 100) / 100 });
+function info(i){
+  var st = WINDOW_STATUS[i];
+  if (!st) return { s: "pend", ns: 0, label: "pendente" };
+  var l = { run: "rodando", done: "concluída", ext: "estendida" }[st.s] || "pendente";
+  return { s: st.s, ns: st.ns || 0, label: l };
+}
+var NS_ = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){
+  var e = document.createElementNS(NS_, tag);
+  for (var k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function X(z){ return 360 + z * 107.9; }
+
+function drawBilayer(svg, selected, onPick){
+  svg.innerHTML = "";
+  el("rect", { x: 0, y: 0, width: 720, height: 230, fill: "var(--water-soft)", rx: 6 }, svg);
+  el("rect", { x: X(-2.1), y: 30, width: X(2.1) - X(-2.1), height: 140, fill: "var(--head)" }, svg);
+  el("rect", { x: X(-1.3), y: 30, width: X(1.3) - X(-1.3), height: 140, fill: "var(--tail)" }, svg);
+  var labels = [
+    [X(-2.75), "água"], [X(-1.7), "cabeças"], [X(0), "caudas lipídicas"], [X(1.7), "cabeças"], [X(2.75), "água"]
+  ];
+  labels.forEach(function(l){
+    var t = el("text", { x: l[0], y: 22, "text-anchor": "middle", fill: "var(--muted)", "font-size": 14, "font-family": "var(--display)" }, svg);
+    t.textContent = l[1];
+  });
+  el("line", { x1: X(-3.3), y1: 100, x2: X(3.3), y2: 100, stroke: "var(--ink)", "stroke-opacity": .35, "stroke-width": 1 }, svg);
+  wins.forEach(function(w){
+    var inf = info(w.i), cx = X(w.z), cy = 100;
+    var fill = inf.s === "pend" ? "var(--surface)" : inf.s === "run" ? "var(--lap)" : "var(--ok)";
+    var stroke = inf.s === "pend" ? "var(--ink)" : "none";
+    if (selected === w.i) el("circle", { cx: cx, cy: cy, r: 12, fill: "none", stroke: "var(--lap)", "stroke-width": 3 }, svg);
+    if (inf.s === "ext") el("circle", { cx: cx, cy: cy, r: 9, fill: "none", stroke: "var(--ok)", "stroke-width": 2 }, svg);
+    var c = el("circle", { cx: cx, cy: cy, r: 5.5, fill: fill, stroke: stroke, "stroke-width": 1.5 }, svg);
+    if (onPick){
+      c.style.cursor = "pointer";
+      var hit = el("circle", { cx: cx, cy: cy, r: 12, fill: "transparent" }, svg);
+      hit.style.cursor = "pointer";
+      hit.addEventListener("click", function(){ onPick(w.i); });
+    }
+  });
+  [-3, 0, 3].forEach(function(z){
+    el("line", { x1: X(z), y1: 170, x2: X(z), y2: 178, stroke: "var(--muted)" }, svg);
+    var t = el("text", { x: X(z), y: 196, "text-anchor": "middle", fill: "var(--muted)", "font-size": 14, "font-family": "var(--display)" }, svg);
+    t.textContent = (z > 0 ? "+" : z < 0 ? "\u2212" : "") + Math.abs(z) + " nm";
+  });
+  var ax = el("text", { x: 360, y: 220, "text-anchor": "middle", fill: "var(--muted)", "font-size": 13, "font-family": "var(--display)" }, svg);
+  ax.textContent = "posição z do lapachol em relação ao centro da bicamada";
+}
+
+var sel = 21;
+var slider = document.getElementById("slider");
+function show(i){
+  sel = Math.max(0, Math.min(N - 1, i));
+  slider.value = sel;
+  var w = wins[sel], inf = info(sel);
+  document.getElementById("detail").innerHTML =
+    "<b>Janela " + (sel + 1) + " de " + N + "</b><br>z = " + fmt(w.z) + " nm &nbsp;·&nbsp; mola de " + K +
+    " kJ/mol/nm²<br>" + fmt(inf.ns, 1) + " de " + fmt(NS_META, 1) + " ns (meta da etapa 1) &nbsp;·&nbsp; " + inf.label;
+  drawBilayer(document.getElementById("win-fig"), sel, show);
+}
+function stats(){
+  var done = 0, ns = 0, run = 0;
+  wins.forEach(function(w){
+    var inf = info(w.i);
+    if (inf.s === "done" || inf.s === "ext") done++;
+    if (inf.s === "run") run++;
+    ns += inf.ns;
+  });
+  document.getElementById("stats").innerHTML =
+    "<div><span>" + done + " de " + N + "</span><small>janelas concluídas</small></div>" +
+    "<div><span>" + fmt(ns, 1) + " ns</span><small>meta da etapa 1: " + (N * NS_META) + " ns</small></div>" +
+    "<div><span>" + run + "</span><small>rodando agora</small></div>";
+}
+function table(){
+  var h = "<tr><th>#</th><th>z (nm)</th><th>ns</th><th>status</th></tr>";
+  wins.forEach(function(w){
+    var inf = info(w.i);
+    h += "<tr><td>" + (w.i + 1) + "</td><td>" + fmt(w.z) + "</td><td>" + fmt(inf.ns, 1) + "</td><td>" + inf.label + "</td></tr>";
+  });
+  document.getElementById("tbl").innerHTML = h;
+}
+function diary(){
+  var h = "";
+  DIARY.forEach(function(e){
+    h += '<article class="entry"><time datetime="' + e.data + '">' + e.data.split("-").reverse().join("/") + '</time><h3>' + e.titulo + '</h3><dl>' +
+      "<dt>O que fiz</dt><dd>" + e.fiz + "</dd>" +
+      "<dt>O que observei</dt><dd>" + e.observei + "</dd>" +
+      "<dt>Por que decidi assim</dt><dd>" + e.porque + "</dd>" +
+      "<dt>Dúvida em aberto</dt><dd>" + e.duvida + "</dd></dl></article>";
+  });
+  document.getElementById("diary").innerHTML = h;
+}
+function codes(){
+  var box = document.getElementById("codes");
+  CODES.forEach(function(c){
+    var d = document.createElement("div"); d.className = "code";
+    var h = document.createElement("h3"); h.textContent = c.titulo;
+    var p = document.createElement("p"); p.textContent = c.desc;
+    var pre = document.createElement("pre"); pre.textContent = c.cod;
+    pre.tabIndex = 0;
+    d.appendChild(h); d.appendChild(p); d.appendChild(pre); box.appendChild(d);
+  });
+}
+
+drawBilayer(document.getElementById("hero-fig"), -1, null);
+stats(); table(); diary(); codes(); show(sel);
+slider.addEventListener("input", function(){ show(+slider.value); });
+document.getElementById("prev").addEventListener("click", function(){ show(sel - 1); });
+document.getElementById("next").addEventListener("click", function(){ show(sel + 1); });
+</script>
+</body>
+</html>
