@@ -1,131 +1,94 @@
-# Lapachol → NQO1: a reproducible DFT / docking / MD pipeline
+# lapachol-membrane
 
-An end-to-end, laptop-scale computational study of **lapachol**, a naphthoquinone from
-the Brazilian *ipê* tree (*Handroanthus* spp.), and its interaction with **human
-NAD(P)H:quinone oxidoreductase 1 (NQO1)**.
+**Free-energy profile of lapachol crossing a POPC bilayer (GROMACS, CHARMM36, umbrella sampling).**
+Project 3 of my computational chemistry portfolio ([msouza-compchem](https://github.com/msouza-compchem)). Work in progress, documented as an open notebook.
 
----
+*Resumo em português: calculo o perfil de energia livre ΔG(z) da permeação do lapachol (naftoquinona do ipê) em uma bicamada de POPC, com dinâmica molecular e umbrella sampling. O projeto está em andamento e este repositório registra cada etapa, com parâmetros, scripts e limitações. O caderno visual está em `docs/` (GitHub Pages).*
 
-## 1. Scientific question
+## Scientific question
 
-NQO1 catalyses the two-electron reduction of quinones. For most quinones this is a
-detoxification route, but for some — notably β-lapachone, the cyclised isomer of
-lapachol — the resulting hydroquinone is unstable and re-oxidises spontaneously,
-driving a futile redox cycle that depletes NAD(P)H and generates reactive oxygen
-species. Because NQO1 is over-expressed in several solid tumours, this turns the
-enzyme into a bioactivation switch rather than a protective one.
+Lapachol is a naphthoquinone from *Handroanthus* (ipê) studied for its biological activity. In [`lapachol-nqo1`](https://github.com/msouza-compchem/lapachol-nqo1) I docked it to intracellular human NQO1; to get there, the molecule has to cross a membrane.
 
-**Question addressed here:** can inexpensive, reproducible calculations rationalise
-the redox behaviour of lapachol, and does the molecule occupy the NQO1 catalytic site
-in a geometry compatible with hydride transfer from the FAD cofactor?
+> What is the free-energy profile, ΔG(z), of lapachol crossing a lipid bilayer, and at which depth does it prefer to sit?
 
-**Approach:** three stages, each independently reproducible.
+Expected outcomes (to be tested, not results): a free-energy minimum near the headgroup/tail interface and a moderate barrier at the bilayer center. A comparison with the computed LogP is planned.
 
-| Stage | Method | Software | Output |
-|-------|--------|----------|--------|
-| 1 | DFT geometry optimisation, frequencies, frontier orbitals, adiabatic electron affinity | ORCA 6 | Electronic descriptors |
-| 2 | Molecular docking into the NQO1 catalytic site | AutoDock Vina 1.2 | Binding pose + score |
-| 3 | Molecular dynamics of the complex, 100 ns | GROMACS 2024 | Pose stability, contacts |
+**What this project will not answer:** ΔG(z) alone does not give permeability (that also needs the diffusion profile D(z), via the solubility-diffusion model); only one protonation state of the weak acid is treated at first; a single lipid composition with a classical force field is not a real cell membrane.
 
----
+## Status
 
-## 2. System
+- [x] Bilayer built with CHARMM-GUI (120 POPC, 13 K⁺, 13 Cl⁻, TIP3P water)
+- [x] 100 ps test run with production parameters (stable; see below)
+- [x] Speed benchmark on a Colab L4 GPU
+- [ ] 100 ns production run of the pure bilayer (area per lipid, thickness and density profiles to check equilibration)
+- [ ] Steered MD along z with lapachol
+- [ ] Umbrella sampling: 5 ns per window to screen, then 10–20 ns for production
+- [ ] WHAM with bootstrap, histogram overlap and block convergence
 
-- **Ligand:** lapachol, C15H14O4, 19 heavy atoms, 2 rotatable bonds.
-- **Receptor:** human NQO1, PDB **1D4A**, 1.7 Å resolution, homodimer with one FAD
-  per monomer. The catalytic site is formed at the dimer interface; Tyr128 and
-  Phe232 gate the site and are known to be conformationally mobile.
-- **Reference ligand for validation:** duroquinone, resolved in PDB **1DXO**, used
-  here as a redocking control.
+## System and parameters
 
----
+| Item | Value |
+|---|---|
+| Software | GROMACS 2023.3 (local, CPU) and 2024.5 conda-forge build with CUDA (Colab) |
+| Builder | CHARMM-GUI |
+| Force field | CHARMM36 (force-switch 1.0–1.2 nm, PME) |
+| Bilayer | 120 POPC (60 per leaflet), 13 K⁺, 13 Cl⁻, 32,267 atoms |
+| Box (after equilibration) | about 6.31 × 6.31 × 7.75 nm |
+| Water | TIP3P (CHARMM) |
+| Temperature / pressure | 303.15 K (v-rescale) / 1 bar, semi-isotropic (C-rescale) |
+| Time step | 2 fs, h-bonds constrained (LINCS) |
 
-## 3. Reproducing this work
+## Results so far
 
-```bash
-git clone https://github.com/<user>/lapachol-nqo1.git
-cd lapachol-nqo1
-conda env create -f environment.yml
-conda activate lapachol
+100 ps test run, CHARMM-GUI production parameters, pure bilayer:
+
+| Quantity | Result |
+|---|---|
+| Temperature | 303.05 K (target 303.15) |
+| Pressure | 8.6 ± 9.4 bar (large fluctuations are expected for this system size) |
+| Box X = Y | 6.310 nm, negligible drift |
+| Box Z | 7.754 nm, drift 0.015 nm |
+| Density | 1017.7 kg/m³ |
+| Area per lipid | about 66 Å² (not yet evidence of equilibrium; see the 100 ns run) |
+| LINCS warnings | none |
+
+Speed: 4.8 ns/day on 4 CPU cores (WSL) and **270 ns/day on a Colab L4 GPU** (100 ps benchmark).
+
+## Repository layout
+
+```
+inputs/bilayer/   starting structure, topology, index and production .mdp
+results/          small outputs (energies, logs) from tests
+scripts/          helper scripts (frame selection, analysis)
+notebooks/        Colab notebooks
+docs/             open notebook (GitHub Pages)
 ```
 
-Then follow the stages in order:
+Trajectories (`.xtc`, `.trr`), checkpoints and binary run input files are not tracked because of size. They are kept on Google Drive and can be shared on request.
+
+## How to reproduce the bilayer run
 
 ```bash
-bash 01_dft/run_orca.sh            # ~3 h on 4 cores
-bash 02_docking/run_docking.sh     # ~5 min
-bash 03_md/build_system.sh         # ~20 min setup; production runs on GPU
-python 04_analysis/orca_descriptors.py
-python 04_analysis/md_analysis.py
+cd inputs/bilayer
+gmx grompp -f prod_100ns.mdp -c step6.6_equilibration.gro -p topol_bilayer.top -n index.ndx -o prod_100ns.tpr
+gmx mdrun -deffnm prod_100ns -cpi prod_100ns.cpt -cpt 10 -maxh 11 -nb gpu -pme gpu -bonded gpu -update gpu
 ```
 
-Each stage writes its figures to `figures/`.
+The `.mdp` file is the CHARMM-GUI `step7_production.mdp` with `nsteps = 50000000` (100 ns).
 
----
+## Planned umbrella sampling
 
-## 4. Computational details
+Pulling along z with `pull-coord1-geometry = direction`, 43 windows spaced 0.15 nm (z from −3.15 to +3.15 nm), force constant 1000 kJ/mol/nm² (to be adjusted if histograms do not overlap). Convergence will be assessed by WHAM over time blocks and bootstrap errors, following common practice for permeation PMFs: Cordeiro (2018) is a close methodological reference.
 
-**DFT.** Geometries optimised at B3LYP-D4/def2-SVP with the RIJCOSX approximation;
-harmonic frequencies computed at the same level to confirm every structure is a true
-minimum (no imaginary frequencies). Single-point energies at B3LYP-D4/def2-TZVP with
-the CPCM implicit water model. The adiabatic electron affinity is obtained from
-separately optimised neutral and radical-anion structures.
+## References
 
-**Docking.** Receptor prepared from 1D4A with FAD retained as part of the rigid
-receptor, since the isoalloxazine ring forms one wall of the substrate site. Search
-box centred on the duroquinone position from the aligned 1DXO structure. Protocol
-validated by redocking duroquinone and checking the RMSD against the crystal pose
-(target: below 2.0 Å).
+1. Torrie GM, Valleau JP. *J Comput Phys* 1977, 23, 187.
+2. Kumar S, et al. *J Comput Chem* 1992, 13, 1011.
+3. Hub JS, de Groot BL, van der Spoel D. *J Chem Theory Comput* 2010, 6, 3713.
+4. Marrink SJ, Berendsen HJC. *J Phys Chem* 1994, 98, 4155.
+5. Jo S, et al. *J Comput Chem* 2008, 29, 1859 (CHARMM-GUI).
+6. Cordeiro RM. *J Phys Chem B* 2018, 122, 8211.
 
-**MD.** CHARMM36m protein force field, CGenFF ligand parameters, TIP3P water,
-0.15 M NaCl, cubic box with 1.0 nm padding. Steepest-descent minimisation, 100 ps NVT
-at 300 K (V-rescale), 100 ps NPT at 1 bar (C-rescale), then 100 ns production with a
-2 fs time step and LINCS constraints on bonds to hydrogen.
+## Author
 
----
-
-## 5. Hardware and why it is split this way
-
-Stages 1 and 2 were run on a consumer laptop (4-core i5, 8 GB RAM). Stage 3 was run
-on a free-tier cloud GPU: the solvated complex contains roughly 50,000 atoms, which
-on CPU alone delivers only 1–3 ns/day, but 30–80 ns/day on a single T4. Trajectory
-files are not versioned here; only inputs, parameters and analysis code are, which is
-sufficient to regenerate every result.
-
----
-
-## 6. Results
-
-*(Fill in as the calculations finish. Keep this section to three or four short
-paragraphs plus the figures — a reader should be able to see the outcome without
-opening any other file.)*
-
-| Descriptor | Value | Unit |
-|------------|-------|------|
-| E(HOMO) | | eV |
-| E(LUMO) | | eV |
-| HOMO–LUMO gap | | eV |
-| Adiabatic electron affinity | | eV |
-| Electrophilicity index ω | | eV |
-| Vina score (best pose) | | kcal/mol |
-| Backbone RMSD, last 50 ns | | nm |
-| Ligand RMSD, last 50 ns | | nm |
-
----
-
-## 7. Limitations
-
-Implicit solvation and a single conformer per species; Vina scores are not free
-energies and are used only to rank poses; the MD samples a single 100 ns replica,
-which is enough to test pose stability but not to converge binding thermodynamics.
-Hydride transfer itself is not modelled — that would require QM/MM.
-
----
-
-## 8. References
-
-See [`docs/REFERENCES.md`](docs/REFERENCES.md).
-
-## 9. Licence
-
-MIT — see [`LICENSE`](LICENSE).
+Marcelo Souza. Chemistry and biology teacher building a computational chemistry portfolio. Code under MIT license (add a `LICENSE` file).
